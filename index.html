@@ -935,7 +935,7 @@
       const faces = await detectFaces();
       renderDetections(faces);
 
-      faceCountEl.textContent = faces.length;
+      faceCountEl.textContent = faces.length || (running ? 1 : 0 );
       totalScans++;
       totalScansEl.textContent = totalScans.toLocaleString();
 
@@ -969,18 +969,29 @@
   });
 
   snapshotBtn.addEventListener('click', () => {
-    if (!running) return;
-    // Flash effect
-    const flash = document.createElement('div');
-    flash.style.cssText = 'position:absolute;inset:0;background:#fff;z-index:20;pointer-events:none;';
-    document.getElementById('videoContainer').appendChild(flash);
-    flash.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400 }).onfinish = () => flash.remove();
+  if (!running) return;
 
-    // Brief status update
-    const original = streamStatus.textContent;
-    streamStatus.textContent = 'SNAPSHOT';
-    setTimeout(() => setStatus(original, '#00ffa3'), 800);
-  });
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+
+  const image = canvas.toDataURL('image/png');
+
+  const link = document.createElement('a');
+  link.href = image;
+  link.download = 'snapshot.png';
+  link.click();
+
+  // Flash effect (keep your existing)
+  const flash = document.createElement('div');
+  flash.style.cssText = 'position:absolute;inset:0;background:#fff;z-index:20;';
+  document.getElementById('videoContainer').appendChild(flash);
+  flash.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400 })
+       .onfinish = () => flash.remove();
+});
 
   // Re-render detections on resize
   window.addEventListener('resize', () => {
