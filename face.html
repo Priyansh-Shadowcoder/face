@@ -521,6 +521,9 @@
   </div>
   <script>
   // ============ Config Setup ============
+  if(location.protocol !== 'https:' && location.hostname !== 'localhost'){
+    alert('Camera requires HTTPS');
+  }
   const defaultConfig = {
     project_title: "FACE.DETECTION",
     project_subtitle: "Computer Vision & Biometric Recognition",
@@ -665,10 +668,7 @@
 
   async function startCamera() {
     try {
-      errorOverlay.classList.add('hidden');
-      setStatus('CONNECTING...', '#fbbf24');
-
-      await initDetector();
+      await navigator.mediaDevices.getUserMedia({video:true});
 
       stream = await navigator.mediaDevices.getUserMedia({
         video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
